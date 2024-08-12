@@ -1,3 +1,12 @@
+pub mod interpreter;
+pub mod lang;
+pub mod lexer;
+pub mod renderer;
+
+use interpreter::evaluate;
+use lang::types::Value;
+use lexer::{tokenize, Token};
+
 fn main() {
     // get args and check for at least 2
     let args: Vec<String> = std::env::args().collect();
@@ -16,4 +25,18 @@ fn main() {
     // open file and read into string
     let contents = std::fs::read_to_string(filename).expect("Failed to read file");
     println!("{}", contents);
+
+    // tokenize string
+    let tokens: Vec<Token> = tokenize(contents);
+    println!("{:?}", tokens);
+
+    // evaluate tokens
+    let values: Vec<Value> = match evaluate(tokens) {
+        Ok(values) => values,
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    };
+    println!("{:?}", values);
 }

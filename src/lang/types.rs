@@ -14,6 +14,7 @@ pub enum Value {
 }
 
 pub trait Operation {
+    fn box_clone(&self) -> Box<dyn Operation>;
     fn call(&self, args: &[Value]) -> Result<Value, String>;
 }
 

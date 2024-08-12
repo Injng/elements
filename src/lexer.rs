@@ -2,7 +2,7 @@ use crate::lang::functions;
 use crate::lang::types::{Operation, Value};
 use std::fmt::{Debug, Error, Formatter};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     Variable(Variable),
     Literal(Literal),
@@ -11,21 +11,31 @@ pub enum Token {
     RightParen,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Variable {
     name: String,
     var: Value,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Literal {
     pub value: Value,
 }
 
 pub struct Function {
     name: String,
-    args: Vec<Token>,
-    function: Box<dyn Operation>,
+    pub args: Vec<Token>,
+    pub function: Box<dyn Operation>,
+}
+
+impl Clone for Function {
+    fn clone(&self) -> Self {
+        Function {
+            name: self.name.clone(),
+            args: self.args.clone(),
+            function: self.function.box_clone(),
+        }
+    }
 }
 
 impl Debug for Function {
