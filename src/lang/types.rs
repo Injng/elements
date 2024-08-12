@@ -21,13 +21,13 @@ pub trait Operation {
 Basic geometric types
 */
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Triangle {
     pub a: Point,
     pub b: Point,

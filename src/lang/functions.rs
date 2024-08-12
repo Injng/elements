@@ -84,7 +84,7 @@ impl FnTriangle {
         let mut points: Vec<Point> = Vec::new();
         for arg in args {
             match arg {
-                Value::Point(p) => points.push(p),
+                Value::Point(p) => points.push(p.clone()),
                 _ => return Err("Invalid types for point".to_string()),
             }
         }
