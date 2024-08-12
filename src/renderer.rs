@@ -1,28 +1,28 @@
-use crate::lang::types::Point;
+use crate::lang::types::{Element, Point, Value};
 
 pub trait Render {
     fn render(&self) -> String;
 }
 
-pub struct Svg<T: Render> {
-    elements: Vec<T>,
+pub struct Svg {
+    elements: Vec<Box<dyn Render>>,
 }
 
-impl Render for Svg<T> {
+impl Render for Svg {
     fn render(&self) -> String {
         let mut elements = String::new();
         for element in &self.elements {
             elements.push_str(&element.render());
         }
         format!(
-            "<svg xmlns=\"http://www.w3.org/2000/svg\">{}</svg>",
+            "<svg viewBox=\"0 0 300 200\" xmlns=\"http://www.w3.org/2000/svg\">{}</svg>",
             elements
         )
     }
 }
 
 pub struct Polygon {
-    points: Vec<Point>,
+    pub points: Vec<Point>,
 }
 
 impl Render for Polygon {
@@ -31,20 +31,29 @@ impl Render for Polygon {
         for point in &self.points {
             points.push_str(&format!("{},{} ", point.x, point.y));
         }
-        format!("<polygon points=\"{}\" />", points)
+        format!("<polygon points=\"{}\"/>", points)
     }
 }
 
 pub struct Circle {
-    center: Point,
-    radius: f64,
+    pub center: Point,
+    pub radius: f64,
 }
 
 impl Render for Circle {
     fn render(&self) -> String {
         format!(
-            "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" />",
+            "<circle cx=\"{}\" cy=\"{}\" r=\"{}\"/>",
             self.center.x, self.center.y, self.radius
         )
     }
+}
+
+pub fn render(values: Vec<Value>) -> Result<String, String> {
+    let mut elements: Vec<Box<dyn Render>> = Vec::new();
+    for value in values {
+        elements.push(value.to_svg());
+    }
+    let svg = Svg { elements };
+    Ok(svg.render())
 }

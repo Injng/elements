@@ -2,6 +2,8 @@
 Internal types
 */
 
+use crate::renderer::{Circle, Polygon, Render};
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Int(i64),
@@ -13,9 +15,24 @@ pub enum Value {
     Triangle(Triangle),
 }
 
+impl Element for Value {
+    /// Turn value into a SVG element
+    fn to_svg(&self) -> Box<dyn Render> {
+        match self {
+            Value::Point(p) => p.to_svg(),
+            Value::Triangle(t) => t.to_svg(),
+            _ => Box::new(Polygon { points: vec![] }),
+        }
+    }
+}
+
 pub trait Operation {
     fn box_clone(&self) -> Box<dyn Operation>;
     fn call(&self, args: &[Value]) -> Result<Value, String>;
+}
+
+pub trait Element {
+    fn to_svg(&self) -> Box<dyn Render>;
 }
 
 /*
@@ -28,11 +45,30 @@ pub struct Point {
     pub y: f64,
 }
 
+impl Element for Point {
+    /// Turn point into a SVG element
+    fn to_svg(&self) -> Box<dyn Render> {
+        Box::new(Circle {
+            center: *self,
+            radius: 2.0,
+        })
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Triangle {
     pub a: Point,
     pub b: Point,
     pub c: Point,
+}
+
+impl Element for Triangle {
+    /// Turn triangle into a SVG element
+    fn to_svg(&self) -> Box<dyn Render> {
+        Box::new(Polygon {
+            points: vec![self.a, self.b, self.c],
+        })
+    }
 }
 
 impl Triangle {

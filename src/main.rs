@@ -4,8 +4,9 @@ pub mod lexer;
 pub mod renderer;
 
 use interpreter::evaluate;
-use lang::types::Value;
+use lang::types::{Element, Value};
 use lexer::{tokenize, Token};
+use renderer::render;
 
 fn main() {
     // get args and check for at least 2
@@ -39,4 +40,8 @@ fn main() {
         }
     };
     println!("{:?}", values);
+
+    // render values to svg
+    let svg = render(values).expect("Failed to render");
+    println!("{}", svg);
 }
