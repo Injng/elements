@@ -1,5 +1,6 @@
 use crate::interpreter::is_valid_variable;
 use crate::lang::types::{Operation, Point, Triangle, Value};
+use crate::renderer::Angle;
 
 /// Macro to implement cloning a boxed trait object
 macro_rules! clone_impl {
@@ -111,7 +112,49 @@ impl Operation for FnNop {
 }
 
 /*
-Basic geometric functions
+Basic geometric components
+*/
+
+#[derive(Clone)]
+pub struct FnAngle;
+impl FnAngle {
+    /// Case 1: create an angle from three points
+    fn from_points(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 3 arguments
+        if args.len() < 3 {
+            return Err("Angle requires exactly 3 arguments".to_string());
+        }
+
+        // check for 3 points
+        let mut points: Vec<Point> = Vec::new();
+        for arg in args {
+            match arg {
+                Value::Point(p) => points.push(p.clone()),
+                _ => return Err("Invalid types for point".to_string()),
+            }
+        }
+
+        // try creating the angle
+        Ok(Value::Angle(Angle {
+            start: points[0],
+            center: points[1],
+            end: points[2],
+        }))
+    }
+}
+
+impl Operation for FnAngle {
+    clone_impl!(FnAngle);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        match self.from_points(args) {
+            Ok(angle) => Ok(angle),
+            _ => Err("Invalid arguments for angle".to_string()),
+        }
+    }
+}
+
+/*
+Basic geometric shapes
 */
 
 #[derive(Clone)]

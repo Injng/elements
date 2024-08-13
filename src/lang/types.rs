@@ -2,7 +2,7 @@
 Internal types
 */
 
-use crate::renderer::{Circle, Nothing, Polygon, Render};
+use crate::renderer::{Angle, Circle, Nothing, Polygon, Render};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -14,6 +14,7 @@ pub enum Value {
     Undefined,
     Point(Point),
     Triangle(Triangle),
+    Angle(Angle),
 }
 
 impl Element for Value {

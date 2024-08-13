@@ -46,6 +46,38 @@ impl Render for Polygon {
     }
 }
 
+pub struct Line {
+    pub start: Point,
+    pub end: Point,
+}
+
+impl Render for Line {
+    fn render(&self) -> String {
+        format!(
+            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>",
+            self.start.x, self.start.y, self.end.x, self.end.y
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Angle {
+    pub center: Point,
+    pub start: Point,
+    pub end: Point,
+}
+
+impl Render for Angle {
+    fn render(&self) -> String {
+        format!(
+            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>\
+             <line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>",
+            self.center.x, self.center.y, self.start.x, self.start.y,
+            self.center.x, self.center.y, self.end.x, self.end.y
+        )
+    }
+}
+
 pub struct Circle {
     pub center: Point,
     pub radius: f64,
