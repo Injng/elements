@@ -21,6 +21,14 @@ impl Render for Svg {
     }
 }
 
+pub struct Nothing;
+
+impl Render for Nothing {
+    fn render(&self) -> String {
+        String::new()
+    }
+}
+
 pub struct Polygon {
     pub points: Vec<Point>,
 }
@@ -31,7 +39,10 @@ impl Render for Polygon {
         for point in &self.points {
             points.push_str(&format!("{},{} ", point.x, point.y));
         }
-        format!("<polygon points=\"{}\"/>", points)
+        format!(
+            "<polygon points=\"{}\" fill=\"none\" stroke=\"black\"/>",
+            points
+        )
     }
 }
 

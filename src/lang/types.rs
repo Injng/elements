@@ -2,7 +2,7 @@
 Internal types
 */
 
-use crate::renderer::{Circle, Polygon, Render};
+use crate::renderer::{Circle, Nothing, Polygon, Render};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -11,6 +11,7 @@ pub enum Value {
     String(String),
     Bool(bool),
     Indeterminate,
+    Undefined,
     Point(Point),
     Triangle(Triangle),
 }
@@ -21,6 +22,7 @@ impl Element for Value {
         match self {
             Value::Point(p) => p.to_svg(),
             Value::Triangle(t) => t.to_svg(),
+            Value::Undefined => Box::new(Nothing),
             _ => Box::new(Polygon { points: vec![] }),
         }
     }

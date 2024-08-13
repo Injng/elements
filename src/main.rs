@@ -4,7 +4,7 @@ pub mod lexer;
 pub mod renderer;
 
 use interpreter::evaluate;
-use lang::types::{Element, Value};
+use lang::types::Value;
 use lexer::{tokenize, Token};
 use renderer::render;
 

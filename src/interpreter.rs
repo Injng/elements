@@ -1,6 +1,23 @@
-use crate::lang::functions;
-use crate::lang::types::{Operation, Value};
+use crate::lang::types::Value;
 use crate::lexer::{Function, Literal, Token};
+
+use std::collections::HashMap;
+
+/// Given a string, determine if it is a valid variable name
+pub fn is_valid_variable(name: &str) -> bool {
+    if name.is_empty() {
+        return false;
+    }
+    if !name.chars().next().unwrap().is_alphabetic() {
+        return false;
+    }
+    for c in name.chars() {
+        if !c.is_alphanumeric() && c != '_' && c != '-' {
+            return false;
+        }
+    }
+    true
+}
 
 /// Given a list of tokens, return a subset with matching parentheses
 fn get_section(tokens: Vec<Token>) -> Result<Vec<Token>, String> {
@@ -39,7 +56,7 @@ fn get_section(tokens: Vec<Token>) -> Result<Vec<Token>, String> {
 }
 
 /// Given a function with matching parantheses, reduce it to a value
-fn reduce(tokens: Vec<Token>) -> Result<Value, String> {
+fn reduce(tokens: Vec<Token>, variables: &mut HashMap<String, Value>) -> Result<Value, String> {
     // check for empty tokens
     if tokens.is_empty() {
         return Err("Empty tokens".to_string());
@@ -76,12 +93,22 @@ fn reduce(tokens: Vec<Token>) -> Result<Value, String> {
             Token::LeftParen => {
                 let section = get_section(tokens[i..].to_vec())?;
                 let length = section.len();
-                let value = reduce(section)?;
+                let value = reduce(section, variables)?;
                 func.args.push(Token::Literal(Literal { value }));
                 i += length;
             }
             Token::Literal(l) => {
                 func.args.push(Token::Literal(l.clone()));
+                i += 1;
+            }
+            Token::Variable(v) => {
+                // check if variable exists
+                if !variables.contains_key(&v.name) {
+                    func.args.push(Token::Variable(v.clone()));
+                } else {
+                    let value = variables.get(&v.name).unwrap().clone();
+                    func.args.push(Token::Literal(Literal { value }));
+                }
                 i += 1;
             }
             _ => {
@@ -97,8 +124,27 @@ fn reduce(tokens: Vec<Token>) -> Result<Value, String> {
             Token::Literal(l) => {
                 value_args.push(l.value);
             }
+            Token::Variable(v) => {
+                let name: String = v.name;
+                value_args.push(Value::String(name))
+            }
             _ => {
                 return Err("Expected literal".to_string());
+            }
+        }
+    }
+
+    // handle setq function
+    if func.name == "setq" {
+        match func.function.call(&value_args) {
+            Ok(value) => {
+                if let Value::String(name) = &value_args[0] {
+                    variables.insert(name.clone(), value.clone());
+                    return Ok(Value::Undefined);
+                }
+            }
+            Err(e) => {
+                return Err(e);
             }
         }
     }
@@ -114,12 +160,15 @@ fn reduce(tokens: Vec<Token>) -> Result<Value, String> {
 pub fn evaluate(tokens: Vec<Token>) -> Result<Vec<Value>, String> {
     let mut values: Vec<Value> = Vec::new();
     let mut i = 0;
+    let mut variables: HashMap<String, Value> = HashMap::new();
+
+    // iterate through all the tokens, calling reduce when a function is detected
     while i < tokens.len() {
         match &tokens[i] {
             Token::LeftParen => {
                 let section = get_section(tokens[i..].to_vec())?;
                 let length = section.len();
-                let value = reduce(section)?;
+                let value = reduce(section, &mut variables)?;
                 values.push(value);
                 i += length;
             }

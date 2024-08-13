@@ -1,3 +1,4 @@
+use crate::interpreter::is_valid_variable;
 use crate::lang::types::{Operation, Point, Triangle, Value};
 
 /// Macro to implement cloning a boxed trait object
@@ -7,6 +8,29 @@ macro_rules! clone_impl {
             Box::new(self.clone())
         }
     };
+}
+
+/*
+Function to set a variable
+*/
+
+#[derive(Clone)]
+pub struct FnSet;
+impl Operation for FnSet {
+    clone_impl!(FnSet);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        if args.len() < 2 {
+            return Err("setq requires exactly 2 arguments".to_string());
+        }
+        let var_name = match &args[0] {
+            Value::String(s) => s,
+            _ => return Err("Invalid variable name".to_string()),
+        };
+        if !is_valid_variable(var_name) {
+            return Err("Invalid variable name".to_string());
+        }
+        Ok(args[1].clone())
+    }
 }
 
 /*

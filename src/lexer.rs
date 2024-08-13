@@ -13,8 +13,8 @@ pub enum Token {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Variable {
-    name: String,
-    var: Value,
+    pub name: String,
+    pub var: Value,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -23,7 +23,7 @@ pub struct Literal {
 }
 
 pub struct Function {
-    name: String,
+    pub name: String,
     pub args: Vec<Token>,
     pub function: Box<dyn Operation>,
 }
@@ -73,6 +73,13 @@ fn match_fn(name: String) -> Function {
             name,
             args: Vec::new(),
             function: Box::new(functions::FnDiv),
+        },
+
+        // setq function
+        "setq" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnSet),
         },
 
         // basic geometric functions
