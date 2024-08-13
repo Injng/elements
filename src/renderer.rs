@@ -40,7 +40,7 @@ impl Render for Polygon {
             points.push_str(&format!("{},{} ", point.x, point.y));
         }
         format!(
-            "<polygon points=\"{}\" fill=\"none\" stroke=\"black\"/>",
+            "<polygon points=\"{}\" fill=\"none\" stroke=\"black\" stroke-width=\"0.02\"/>",
             points
         )
     }
