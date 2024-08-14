@@ -1,4 +1,7 @@
-use crate::renderer::{Render, SvgCircle, SvgLine, SvgNothing, SvgPolygon};
+use crate::{
+    renderer::{Render, SvgCircle, SvgLine, SvgNothing, SvgPolygon},
+    TOLERANCE,
+};
 
 use std::f64::consts::PI;
 
@@ -120,17 +123,19 @@ impl Circle {
 
     /// Check if a point is on the circle
     pub fn is_point_on_circle(&self, point: Point) -> bool {
-        (point.x - self.center.x).powi(2) + (point.y - self.center.y).powi(2) == self.radius.powi(2)
+        let lhs: f64 = (point.x - self.center.x).powi(2) + (point.y - self.center.y).powi(2);
+        let rhs: f64 = self.radius.powi(2);
+        (lhs - rhs).abs() < TOLERANCE
     }
 
     /// Return the point on a specified arc from a given angle
     pub fn get_point_on_arc(&self, start: Point, end: Point, deg: f64) -> Result<Point, String> {
         // ensure that the points are on the circle
-        /*
         if !self.is_point_on_circle(start) || !self.is_point_on_circle(end) {
             return Err("Points are not on the circle".to_string());
         }
-        */
+
+        // initialize variables
         let angle = deg.to_radians();
         let center = self.center;
         let radius = self.radius;

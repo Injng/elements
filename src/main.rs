@@ -11,6 +11,8 @@ use renderer::render;
 
 use std::fs;
 
+const TOLERANCE: f64 = 1e-10;
+
 fn main() {
     // get args and check for at least 2
     let args: Vec<String> = std::env::args().collect();
