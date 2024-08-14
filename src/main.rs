@@ -9,6 +9,8 @@ use lang::types::Value;
 use lexer::{tokenize, Token};
 use renderer::render;
 
+use std::fs;
+
 fn main() {
     // get args and check for at least 2
     let args: Vec<String> = std::env::args().collect();
@@ -45,4 +47,8 @@ fn main() {
     // render values to svg
     let svg = render(values).expect("Failed to render");
     println!("{}", svg);
+
+    // write svg to file
+    let filename = "out.svg";
+    fs::write(filename, svg).expect("Failed to write file");
 }
