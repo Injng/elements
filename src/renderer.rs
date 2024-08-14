@@ -60,24 +60,6 @@ impl Render for Line {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Angle {
-    pub center: Point,
-    pub start: Point,
-    pub end: Point,
-}
-
-impl Render for Angle {
-    fn render(&self) -> String {
-        format!(
-            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>\
-             <line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>",
-            self.center.x, self.center.y, self.start.x, self.start.y,
-            self.center.x, self.center.y, self.end.x, self.end.y
-        )
-    }
-}
-
 pub struct Circle {
     pub center: Point,
     pub radius: f64,
@@ -95,7 +77,8 @@ impl Render for Circle {
 pub fn render(values: Vec<Value>) -> Result<String, String> {
     let mut elements: Vec<Box<dyn Render>> = Vec::new();
     for value in values {
-        elements.push(value.to_svg());
+        let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
+        elements.extend(svg_elements);
     }
     let svg = Svg { elements };
     Ok(svg.render())

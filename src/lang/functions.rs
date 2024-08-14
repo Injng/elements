@@ -1,6 +1,6 @@
 use crate::interpreter::is_valid_variable;
+use crate::lang::types::Angle;
 use crate::lang::types::{Operation, Point, Triangle, Value};
-use crate::renderer::Angle;
 
 /// Macro to implement cloning a boxed trait object
 macro_rules! clone_impl {

@@ -2,7 +2,7 @@
 Internal types
 */
 
-use crate::renderer::{Angle, Circle, Nothing, Polygon, Render};
+use crate::renderer::{Circle, Line, Nothing, Polygon, Render};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -19,12 +19,12 @@ pub enum Value {
 
 impl Element for Value {
     /// Turn value into a SVG element
-    fn to_svg(&self) -> Box<dyn Render> {
+    fn to_svg(&self) -> Vec<Box<dyn Render>> {
         match self {
             Value::Point(p) => p.to_svg(),
             Value::Triangle(t) => t.to_svg(),
-            Value::Undefined => Box::new(Nothing),
-            _ => Box::new(Polygon { points: vec![] }),
+            Value::Undefined => vec![Box::new(Nothing)],
+            _ => vec![Box::new(Polygon { points: vec![] })],
         }
     }
 }
@@ -35,7 +35,7 @@ pub trait Operation {
 }
 
 pub trait Element {
-    fn to_svg(&self) -> Box<dyn Render>;
+    fn to_svg(&self) -> Vec<Box<dyn Render>>;
 }
 
 /*
@@ -50,11 +50,33 @@ pub struct Point {
 
 impl Element for Point {
     /// Turn point into a SVG element
-    fn to_svg(&self) -> Box<dyn Render> {
-        Box::new(Circle {
+    fn to_svg(&self) -> Vec<Box<dyn Render>> {
+        vec![Box::new(Circle {
             center: *self,
             radius: 2.0,
-        })
+        })]
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Angle {
+    pub start: Point,
+    pub center: Point,
+    pub end: Point,
+}
+
+impl Element for Angle {
+    /// Turn angle into a SVG element
+    fn to_svg(&self) -> Vec<Box<dyn Render>> {
+        let first: Line = Line {
+            start: self.center,
+            end: self.start,
+        };
+        let second: Line = Line {
+            start: self.center,
+            end: self.end,
+        };
+        vec![Box::new(first), Box::new(second)]
     }
 }
 
@@ -67,10 +89,10 @@ pub struct Triangle {
 
 impl Element for Triangle {
     /// Turn triangle into a SVG element
-    fn to_svg(&self) -> Box<dyn Render> {
-        Box::new(Polygon {
+    fn to_svg(&self) -> Vec<Box<dyn Render>> {
+        vec![Box::new(Polygon {
             points: vec![self.a, self.b, self.c],
-        })
+        })]
     }
 }
 
