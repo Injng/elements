@@ -2,6 +2,7 @@ pub mod interpreter;
 pub mod lang;
 pub mod lexer;
 pub mod renderer;
+pub mod utils;
 
 use interpreter::evaluate;
 use lang::types::Value;

@@ -1,6 +1,7 @@
 use crate::interpreter::is_valid_variable;
 use crate::lang::types::Angle;
-use crate::lang::types::{Operation, Point, Triangle, Value};
+use crate::lang::types::{Circle, Operation, Point, Triangle, Value};
+use crate::utils::geometry::distance;
 
 /// Macro to implement cloning a boxed trait object
 macro_rules! clone_impl {
@@ -116,6 +117,61 @@ Basic geometric components
 */
 
 #[derive(Clone)]
+pub struct FnInscribedAngle;
+impl FnInscribedAngle {
+    /// Case 1: create an inscribed angle given a circle and an degree value
+    fn from_circle_degrees(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 2 arguments
+        if args.len() < 2 {
+            return Err("Inscribed angle requires exactly 2 arguments".to_string());
+        }
+
+        // check for circle and degree
+        let circle = match &args[0] {
+            Value::Circle(c) => c,
+            _ => return Err("Invalid types for circle".to_string()),
+        };
+        let degree = match &args[1] {
+            Value::Int(d) => *d,
+            _ => return Err("Invalid types for degree".to_string()),
+        };
+
+        // check if degree exceeds 180 degrees on the circle
+        if degree > 180 {
+            return Err("Degree exceeds 180 degrees".to_string());
+        }
+
+        // get two random points on the circle to create first line
+        let mut start = circle.get_point();
+        let mut center = circle.get_point();
+
+        // redo if the points are too close to each other
+        while distance(start, center) < circle.radius {
+            start = circle.get_point();
+            center = circle.get_point();
+        }
+
+        // get the end point of the angle, always choosing the larger arc
+        let end = match circle.get_point_on_arc(start, center, degree as f64) {
+            Ok(p) => p,
+            Err(e) => return Err(e),
+        };
+
+        Ok(Value::Angle(Angle { start, center, end }))
+    }
+}
+
+impl Operation for FnInscribedAngle {
+    clone_impl!(FnInscribedAngle);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        match self.from_circle_degrees(args) {
+            Ok(angle) => Ok(angle),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct FnAngle;
 impl FnAngle {
     /// Case 1: create an angle from three points
@@ -156,6 +212,45 @@ impl Operation for FnAngle {
 /*
 Basic geometric shapes
 */
+
+#[derive(Clone)]
+pub struct FnCircle;
+impl FnCircle {
+    /// Case 1: create a circle from a point and a radius
+    fn from_point_radius(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 2 arguments
+        if args.len() < 2 {
+            return Err("Circle requires exactly 2 arguments".to_string());
+        }
+
+        // check for point and radius
+        let point = match &args[0] {
+            Value::Point(p) => p.clone(),
+            _ => return Err("Invalid types for point".to_string()),
+        };
+        let radius = match &args[1] {
+            Value::Int(r) => *r as f64,
+            Value::Float(r) => *r,
+            _ => return Err("Invalid types for radius".to_string()),
+        };
+
+        // try creating the circle
+        match Circle::new(point, radius) {
+            Ok(circle) => Ok(Value::Circle(circle)),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+impl Operation for FnCircle {
+    clone_impl!(FnCircle);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        match self.from_point_radius(args) {
+            Ok(circle) => Ok(circle),
+            Err(e) => Err(e),
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct FnTriangle;

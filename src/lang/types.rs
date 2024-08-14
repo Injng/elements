@@ -1,8 +1,6 @@
-/*
-Internal types
-*/
+use crate::renderer::{Render, SvgCircle, SvgLine, SvgNothing, SvgPolygon};
 
-use crate::renderer::{Circle, Line, Nothing, Polygon, Render};
+use std::f64::consts::PI;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -15,6 +13,7 @@ pub enum Value {
     Point(Point),
     Triangle(Triangle),
     Angle(Angle),
+    Circle(Circle),
 }
 
 impl Element for Value {
@@ -23,8 +22,10 @@ impl Element for Value {
         match self {
             Value::Point(p) => p.to_svg(),
             Value::Triangle(t) => t.to_svg(),
-            Value::Undefined => vec![Box::new(Nothing)],
-            _ => vec![Box::new(Polygon { points: vec![] })],
+            Value::Angle(a) => a.to_svg(),
+            Value::Circle(c) => c.to_svg(),
+            Value::Undefined => vec![Box::new(SvgNothing)],
+            _ => vec![Box::new(SvgPolygon { points: vec![] })],
         }
     }
 }
@@ -51,7 +52,7 @@ pub struct Point {
 impl Element for Point {
     /// Turn point into a SVG element
     fn to_svg(&self) -> Vec<Box<dyn Render>> {
-        vec![Box::new(Circle {
+        vec![Box::new(SvgCircle {
             center: *self,
             radius: 2.0,
         })]
@@ -68,15 +69,95 @@ pub struct Angle {
 impl Element for Angle {
     /// Turn angle into a SVG element
     fn to_svg(&self) -> Vec<Box<dyn Render>> {
-        let first: Line = Line {
+        let first: SvgLine = SvgLine {
             start: self.center,
             end: self.start,
         };
-        let second: Line = Line {
+        let second: SvgLine = SvgLine {
             start: self.center,
             end: self.end,
         };
         vec![Box::new(first), Box::new(second)]
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Circle {
+    pub center: Point,
+    pub radius: f64,
+}
+
+impl Element for Circle {
+    /// Turn circle into a SVG element
+    fn to_svg(&self) -> Vec<Box<dyn Render>> {
+        vec![Box::new(SvgCircle {
+            center: self.center,
+            radius: self.radius,
+        })]
+    }
+}
+
+impl Circle {
+    /// Create a new circle given a center and radius
+    pub fn new(center: Point, radius: f64) -> Result<Self, String> {
+        // check for negative radius
+        if radius < 0.0 {
+            return Err("Radius is negative".to_string());
+        }
+
+        // otherwise, return the circle
+        Ok(Self { center, radius })
+    }
+
+    /// Return a random point on the circle
+    pub fn get_point(&self) -> Point {
+        let angle = rand::random::<f64>() * 2.0 * PI;
+        Point {
+            x: self.center.x + self.radius * angle.cos(),
+            y: self.center.y + self.radius * angle.sin(),
+        }
+    }
+
+    /// Check if a point is on the circle
+    pub fn is_point_on_circle(&self, point: Point) -> bool {
+        (point.x - self.center.x).powi(2) + (point.y - self.center.y).powi(2) == self.radius.powi(2)
+    }
+
+    /// Return the point on a specified arc from a given angle
+    pub fn get_point_on_arc(&self, start: Point, end: Point, deg: f64) -> Result<Point, String> {
+        // ensure that the points are on the circle
+        /*
+        if !self.is_point_on_circle(start) || !self.is_point_on_circle(end) {
+            return Err("Points are not on the circle".to_string());
+        }
+        */
+        let angle = deg.to_radians();
+        let center = self.center;
+        let radius = self.radius;
+
+        // calculate angles from center to start and end points
+        let start_angle = (start.y - center.y).atan2(start.x - center.x);
+        let end_angle = (end.y - center.y).atan2(end.x - center.x);
+
+        // figure out which direction to go based on which arc is bigger
+        let angle = if start_angle < end_angle {
+            if end_angle - start_angle > PI {
+                start_angle + angle
+            } else {
+                end_angle - angle
+            }
+        } else {
+            if start_angle - end_angle > PI {
+                start_angle - angle
+            } else {
+                end_angle + angle
+            }
+        };
+
+        Ok(Point {
+            x: center.x + radius * angle.cos(),
+            y: center.y + radius * angle.sin(),
+        })
     }
 }
 
@@ -90,7 +171,7 @@ pub struct Triangle {
 impl Element for Triangle {
     /// Turn triangle into a SVG element
     fn to_svg(&self) -> Vec<Box<dyn Render>> {
-        vec![Box::new(Polygon {
+        vec![Box::new(SvgPolygon {
             points: vec![self.a, self.b, self.c],
         })]
     }

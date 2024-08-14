@@ -82,7 +82,24 @@ fn match_fn(name: String) -> Function {
             function: Box::new(functions::FnSet),
         },
 
+        // basic geometric components
+        "angle" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnAngle),
+        },
+        "iangle" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnInscribedAngle),
+        },
+
         // basic geometric functions
+        "circle" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnCircle),
+        },
         "point" => Function {
             name,
             args: Vec::new(),

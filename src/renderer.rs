@@ -15,25 +15,25 @@ impl Render for Svg {
             elements.push_str(&element.render());
         }
         format!(
-            "<svg viewBox=\"0 0 300 200\" xmlns=\"http://www.w3.org/2000/svg\">{}</svg>",
+            "<svg viewBox=\"0 0 50 50\" xmlns=\"http://www.w3.org/2000/svg\">{}</svg>",
             elements
         )
     }
 }
 
-pub struct Nothing;
+pub struct SvgNothing;
 
-impl Render for Nothing {
+impl Render for SvgNothing {
     fn render(&self) -> String {
         String::new()
     }
 }
 
-pub struct Polygon {
+pub struct SvgPolygon {
     pub points: Vec<Point>,
 }
 
-impl Render for Polygon {
+impl Render for SvgPolygon {
     fn render(&self) -> String {
         let mut points = String::new();
         for point in &self.points {
@@ -46,12 +46,12 @@ impl Render for Polygon {
     }
 }
 
-pub struct Line {
+pub struct SvgLine {
     pub start: Point,
     pub end: Point,
 }
 
-impl Render for Line {
+impl Render for SvgLine {
     fn render(&self) -> String {
         format!(
             "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>",
@@ -60,15 +60,15 @@ impl Render for Line {
     }
 }
 
-pub struct Circle {
+pub struct SvgCircle {
     pub center: Point,
     pub radius: f64,
 }
 
-impl Render for Circle {
+impl Render for SvgCircle {
     fn render(&self) -> String {
         format!(
-            "<circle cx=\"{}\" cy=\"{}\" r=\"{}\"/>",
+            "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"black\" stroke-width=\"0.02\"/>",
             self.center.x, self.center.y, self.radius
         )
     }
