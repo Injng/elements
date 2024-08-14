@@ -267,7 +267,7 @@ impl FnTriangle {
     fn from_points(&self, args: &[Value]) -> Result<Value, String> {
         // check for 3 arguments
         if args.len() < 3 {
-            return Err("Point requires exactly 3 arguments".to_string());
+            return Err("Triangle requires exactly 3 arguments".to_string());
         }
 
         // check for 3 points
@@ -285,12 +285,82 @@ impl FnTriangle {
             Err(e) => Err(e),
         }
     }
+
+    /// Case 2: create a triangle from an angle
+    fn from_angle(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 1 argument
+        if args.len() < 1 {
+            return Err("Triangle requires exactly 1 argument".to_string());
+        }
+
+        // check for 1 angle
+        let angle = match &args[0] {
+            Value::Angle(a) => a.clone(),
+            _ => return Err("Invalid types for angle".to_string()),
+        };
+
+        // extract points for the angle
+        let start = angle.start;
+        let center = angle.center;
+        let end = angle.end;
+
+        // try creating the triangle
+        match Triangle::new(start, center, end) {
+            Ok(triangle) => Ok(Value::Triangle(triangle)),
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Case 3 [ambiguous]: create a triangle from a circle
+    fn from_circle(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 1 argument
+        if args.len() < 1 {
+            return Err("Triangle requires exactly 1 argument".to_string());
+        }
+
+        // check for 1 circle
+        let circle = match &args[0] {
+            Value::Circle(c) => c.clone(),
+            _ => return Err("Invalid types for circle".to_string()),
+        };
+
+        // extract points for the circle
+        let mut first = circle.get_point();
+        let mut second = circle.get_point();
+        let mut third = circle.get_point();
+
+        // make sure the points are greater than half the radius apart
+        while distance(first, second) < circle.radius / 2.0
+            || distance(second, third) < circle.radius / 2.0
+            || distance(third, first) < circle.radius / 2.0
+        {
+            first = circle.get_point();
+            second = circle.get_point();
+            third = circle.get_point();
+        }
+
+        // try creating the triangle
+        match Triangle::new(first, second, third) {
+            Ok(triangle) => Ok(Value::Triangle(triangle)),
+            Err(e) => Err(e),
+        }
+    }
 }
 
 impl Operation for FnTriangle {
     clone_impl!(FnTriangle);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
         match self.from_points(args) {
+            Ok(triangle) => return Ok(triangle),
+            _ => {}
+        }
+
+        match self.from_circle(args) {
+            Ok(triangle) => return Ok(triangle),
+            _ => {}
+        }
+
+        match self.from_angle(args) {
             Ok(triangle) => Ok(triangle),
             _ => Err("Invalid arguments for triangle".to_string()),
         }
