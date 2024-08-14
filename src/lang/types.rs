@@ -139,24 +139,27 @@ impl Circle {
         let start_angle = (start.y - center.y).atan2(start.x - center.x);
         let end_angle = (end.y - center.y).atan2(end.x - center.x);
 
-        // figure out which direction to go based on which arc is bigger
-        let angle = if start_angle < end_angle {
-            if end_angle - start_angle > PI {
-                start_angle + angle
-            } else {
-                end_angle - angle
-            }
+        // normalize angles to be between 0 and 2PI
+        let start_angle = if start_angle < 0.0 {
+            start_angle + 2.0 * PI
         } else {
-            if start_angle - end_angle > PI {
-                start_angle - angle
-            } else {
-                end_angle + angle
-            }
+            start_angle
+        };
+        let end_angle = if end_angle < 0.0 {
+            end_angle + 2.0 * PI
+        } else {
+            end_angle
         };
 
+        // always utilize the larger arc
+        let mut direction: f64 = 1.0;
+        if (end_angle - start_angle).abs() > PI {
+            direction = -1.0;
+        }
+
         Ok(Point {
-            x: center.x + radius * angle.cos(),
-            y: center.y + radius * angle.sin(),
+            x: center.x + radius * (start_angle + direction * 2.0 * angle).cos(),
+            y: center.y + radius * (start_angle + direction * 2.0 * angle).sin(),
         })
     }
 }

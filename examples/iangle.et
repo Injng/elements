@@ -1,3 +1,3 @@
 (setq C (circle (point 10 10) 5))
 (circle (point 10 10) 5)
-(iangle C 90)
+(iangle C 45)
