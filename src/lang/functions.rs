@@ -131,13 +131,14 @@ impl FnInscribedAngle {
             Value::Circle(c) => c,
             _ => return Err("Invalid types for circle".to_string()),
         };
-        let degree = match &args[1] {
-            Value::Int(d) => *d,
+        let degree: f64 = match &args[1] {
+            Value::Int(i) => *i as f64,
+            Value::Float(f) => *f,
             _ => return Err("Invalid types for degree".to_string()),
         };
 
         // check if degree exceeds 180 degrees on the circle
-        if degree > 180 {
+        if degree > 180.0 {
             return Err("Degree exceeds 180 degrees".to_string());
         }
 
@@ -145,8 +146,15 @@ impl FnInscribedAngle {
         let mut start = circle.get_point();
         let mut center = circle.get_point();
 
-        // redo if the points are too close to each other
-        while distance(start, center) < circle.radius {
+        // limit the maximum distance between the two points if angle is greater than 90 degrees
+        let max_distance = (180.0 - degree).to_radians().sin() * circle.radius * 2.0;
+        while distance(start, center) > max_distance && degree > 90.0 {
+            start = circle.get_point();
+            center = circle.get_point();
+        }
+
+        // if maximum distance is not less than the radius, limit the minimum distance to the radius
+        while distance(start, center) < circle.radius && max_distance > circle.radius {
             start = circle.get_point();
             center = circle.get_point();
         }

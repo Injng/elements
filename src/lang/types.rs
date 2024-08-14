@@ -153,8 +153,14 @@ impl Circle {
 
         // always utilize the larger arc
         let mut direction: f64 = 1.0;
-        if (end_angle - start_angle).abs() > PI {
-            direction = -1.0;
+        if (end_angle - start_angle).abs() < PI {
+            if start_angle < end_angle {
+                direction = -1.0;
+            }
+        } else {
+            if start_angle < end_angle {
+                direction = -1.0;
+            }
         }
 
         Ok(Point {
