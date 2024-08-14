@@ -176,6 +176,15 @@ pub fn evaluate(tokens: Vec<Token>) -> Result<Vec<Value>, String> {
                 values.push(l.value.clone());
                 i += 1;
             }
+            Token::Variable(v) => {
+                if !variables.contains_key(&v.name) {
+                    return Err("Undefined variable when evaluating".to_string());
+                } else {
+                    let value = variables.get(&v.name).unwrap().clone();
+                    values.push(value);
+                }
+                i += 1;
+            }
             _ => {
                 return Err("Unexpected token when evaluating".to_string());
             }
