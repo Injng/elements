@@ -248,11 +248,30 @@ impl FnCircle {
             Err(e) => Err(e),
         }
     }
+
+    /// Case 2 [ambiguous]: create a standard circle if no arguments provided
+    fn new(&self, args: &[Value]) -> Result<Value, String> {
+        // check for no arguments
+        if args.len() != 0 {
+            return Err("Circle requires exactly 2 arguments".to_string());
+        }
+
+        // try creating the circle
+        match Circle::new(Point { x: 0.0, y: 0.0 }, 5.0) {
+            Ok(circle) => Ok(Value::Circle(circle)),
+            Err(e) => Err(e),
+        }
+    }
 }
 
 impl Operation for FnCircle {
     clone_impl!(FnCircle);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
+        match self.new(args) {
+            Ok(circle) => return Ok(circle),
+            _ => {}
+        }
+
         match self.from_point_radius(args) {
             Ok(circle) => Ok(circle),
             Err(e) => Err(e),
