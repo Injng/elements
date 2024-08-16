@@ -1,3 +1,4 @@
-(setq C (circle (point 5 5) 5))
+(setq A (point 5 5))
+(setq C (circle A 5))
 C
 (triangle C)

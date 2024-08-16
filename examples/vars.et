@@ -1,4 +1,4 @@
-(setq A (point 0 0))
-(setq B (point 0 3))
-(setq C (point 4 0))
+(setq A (point 3 3))
+(setq B (point 3 6))
+(setq C (point 7 3))
 (triangle A B C)

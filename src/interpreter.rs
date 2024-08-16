@@ -190,5 +190,17 @@ pub fn evaluate(tokens: Vec<Token>) -> Result<Vec<Value>, String> {
             }
         }
     }
+
+    // for each of the variables containing a point, add a svg label element
+    for (name, value) in &variables {
+        if let Value::Point(p) = value {
+            // extract the x and y values
+            let mut loc: String = " ".to_string() + &p.x.to_string();
+            loc += " ";
+            loc += &p.y.to_string();
+            values.push(Value::String(name.clone() + &loc));
+        }
+    }
+
     Ok(values)
 }

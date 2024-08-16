@@ -1,5 +1,5 @@
 use crate::{
-    renderer::{Render, SvgCircle, SvgLine, SvgNothing, SvgPolygon},
+    renderer::{Render, SvgCircle, SvgLabel, SvgLine, SvgNothing, SvgPolygon},
     TOLERANCE,
 };
 
@@ -27,6 +27,7 @@ impl Element for Value {
             Value::Triangle(t) => t.to_svg(),
             Value::Angle(a) => a.to_svg(),
             Value::Circle(c) => c.to_svg(),
+            Value::String(s) => s.to_svg(),
             Value::Undefined => vec![Box::new(SvgNothing)],
             _ => vec![Box::new(SvgPolygon { points: vec![] })],
         }
@@ -40,6 +41,24 @@ pub trait Operation {
 
 pub trait Element {
     fn to_svg(&self) -> Vec<Box<dyn Render>>;
+}
+
+/// Implement Element for string labels
+impl Element for String {
+    fn to_svg(&self) -> Vec<Box<dyn Render>> {
+        // extract name and point values from the string
+        let mut parts = self.split_whitespace();
+        let name = parts.next().unwrap();
+        let x = parts.next().unwrap().parse::<f64>().unwrap();
+        let y = parts.next().unwrap().parse::<f64>().unwrap();
+        let loc = Point { x, y };
+
+        vec![Box::new(SvgLabel {
+            text: name.to_string(),
+            pt: loc,
+            position: None,
+        })]
+    }
 }
 
 /*

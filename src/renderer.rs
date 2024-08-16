@@ -3,6 +3,8 @@ use crate::{
     utils::geometry::bresenham,
 };
 
+use std::any::Any;
+
 pub trait Render {
     /// Render the element as a SVG string
     fn render(&self) -> String;
@@ -10,6 +12,17 @@ pub trait Render {
     fn get_bounds(&self) -> (Point, Point);
     /// Mark on an array where pixels are
     fn mark_pixels(&self, bitmap: &mut Vec<Vec<bool>>, scale: f64);
+    /// Return self for as_any
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+}
+
+/// Macro to automatically implement as_any for a struct
+macro_rules! impl_as_any {
+    ($struct_name:ident) => {
+        fn as_any_mut(&mut self) -> &mut dyn Any {
+            self
+        }
+    };
 }
 
 pub struct Svg {
@@ -17,6 +30,7 @@ pub struct Svg {
 }
 
 impl Render for Svg {
+    impl_as_any!(Svg);
     fn render(&self) -> String {
         // get the SVG string for each element
         let mut elements = String::new();
@@ -101,6 +115,7 @@ impl Svg {
 pub struct SvgNothing;
 
 impl Render for SvgNothing {
+    impl_as_any!(SvgNothing);
     fn render(&self) -> String {
         String::new()
     }
@@ -114,11 +129,53 @@ impl Render for SvgNothing {
     }
 }
 
+pub struct SvgLabel {
+    pub text: String,
+    pub pt: Point,
+    pub position: Option<Point>,
+}
+
+impl Render for SvgLabel {
+    impl_as_any!(SvgLabel);
+    fn render(&self) -> String {
+        // extract point from option
+        let point = match self.position {
+            Some(point) => point,
+            None => Point { x: 0.0, y: 0.0 },
+        };
+
+        format!(
+            "\t<text x=\"{}\" y=\"{}\" font-family=\"serif\" font-size=\"0.5\" fill=\"black\">{}</text>\n",
+            point.x, point.y, self.text
+        )
+    }
+
+    fn get_bounds(&self) -> (Point, Point) {
+        let point = match self.position {
+            Some(point) => point,
+            None => Point { x: 0.0, y: 0.0 },
+        };
+        (point, point)
+    }
+
+    fn mark_pixels(&self, _: &mut Vec<Vec<bool>>, _: f64) {
+        // Do nothing
+    }
+}
+
+impl SvgLabel {
+    /// Function to set the position
+    pub fn set_position(&mut self, position: Point) {
+        self.position = Some(position);
+    }
+}
+
 pub struct SvgPolygon {
     pub points: Vec<Point>,
 }
 
 impl Render for SvgPolygon {
+    impl_as_any!(SvgPolygon);
     fn render(&self) -> String {
         let mut points = String::new();
         for point in &self.points {
@@ -195,6 +252,7 @@ pub struct SvgLine {
 }
 
 impl Render for SvgLine {
+    impl_as_any!(SvgLine);
     fn render(&self) -> String {
         format!(
             "\t<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>\n",
@@ -250,6 +308,7 @@ pub struct SvgCircle {
 }
 
 impl Render for SvgCircle {
+    impl_as_any!(SvgCircle);
     fn render(&self) -> String {
         format!(
             "\t<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"black\" stroke-width=\"0.02\"/>\n",
@@ -315,7 +374,7 @@ pub fn render(values: Vec<Value>) -> Result<String, String> {
         let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
         elements.extend(svg_elements);
     }
-    let svg = Svg { elements };
+    let mut svg = Svg { elements };
 
     // mark pixels on bitmap
     let (_, max_point): (Point, Point) = svg.get_viewbox();
@@ -324,12 +383,67 @@ pub fn render(values: Vec<Value>) -> Result<String, String> {
         vec![vec![false; (max_point.x * scale) as usize]; (max_point.y * scale) as usize];
     svg.mark_pixels(&mut bitmap, scale);
 
-    // fancy print out the bitmap
-    for row in bitmap.iter() {
-        for pixel in row.iter() {
-            print!("{}", if *pixel { "X" } else { " " });
+    // for each SvgLabel element, figure out best position to put the label
+    for element in &mut svg.elements {
+        if let Some(label) = element.as_any_mut().downcast_mut::<SvgLabel>() {
+            // get initial center position of element to be labelled
+            let center_x: f64 = label.pt.x.round();
+            let center_y: f64 = label.pt.y.round();
+
+            // define search and label radii and initialize scores
+            let search_radius = 5;
+            let label_radius = 1;
+            let mut best_x = 0;
+            let mut best_y = 0;
+            let mut best_score = i32::MIN;
+
+            for dy in -search_radius..=search_radius {
+                for dx in -search_radius..=search_radius {
+                    let x = (center_x * scale).round() as i32 + dx;
+                    let y = (center_y * scale).round() as i32 + dy;
+
+                    let mut score: i32 = 0;
+                    for ly in (y - label_radius)..(y + label_radius) {
+                        for lx in (x - label_radius)..(x + label_radius) {
+                            // if a pixel is taken, reduce the score
+                            if bitmap[ly as usize][lx as usize] {
+                                score -= 1;
+                            }
+
+                            // prefer positions closer to the original center
+                            score -= (lx - x).abs() + (ly - y).abs();
+                        }
+                    }
+
+                    if score > best_score {
+                        best_score = score;
+                        best_x = x;
+                        best_y = y;
+                    }
+                }
+            }
+
+            if best_score > i32::MIN {
+                label.set_position(Point {
+                    x: best_x as f64 / scale,
+                    y: best_y as f64 / scale,
+                });
+            } else {
+                // Fallback to original position if no valid position found
+                label.set_position(Point {
+                    x: center_x,
+                    y: center_y,
+                });
+            }
+
+            // print position
+            println!(
+                "{}: ({}, {})",
+                label.text,
+                label.position.unwrap().x,
+                label.position.unwrap().y,
+            );
         }
-        println!();
     }
 
     Ok(svg.render())
