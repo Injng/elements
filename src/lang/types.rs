@@ -76,7 +76,7 @@ impl Element for Point {
     fn to_svg(&self) -> Vec<Box<dyn Render>> {
         vec![Box::new(SvgCircle {
             center: *self,
-            radius: 2.0,
+            radius: 0.01,
         })]
     }
 }
@@ -220,5 +220,58 @@ impl Triangle {
 
         // otherwise, return the triangle
         Ok(Self { a, b, c })
+    }
+
+    /// Return the inradius of the triangle
+    pub fn inradius(&self) -> f64 {
+        // calculate the side lengths
+        let a = (self.b.x - self.c.x).hypot(self.b.y - self.c.y);
+        let b = (self.a.x - self.c.x).hypot(self.a.y - self.c.y);
+        let c = (self.a.x - self.b.x).hypot(self.a.y - self.b.y);
+
+        // calculate the semiperimeter
+        let s = (a + b + c) / 2.0;
+
+        // calculate the inradius
+        (s * (s - a) * (s - b) * (s - c)).sqrt() / s
+    }
+
+    /// Return the incenter of the triangle
+    pub fn incenter(&self) -> Point {
+        // calculate the side lengths
+        let a = (self.b.x - self.c.x).hypot(self.b.y - self.c.y);
+        let b = (self.a.x - self.c.x).hypot(self.a.y - self.c.y);
+        let c = (self.a.x - self.b.x).hypot(self.a.y - self.b.y);
+
+        // calculate the incenter
+        let x = (a * self.a.x + b * self.b.x + c * self.c.x) / (a + b + c);
+        let y = (a * self.a.y + b * self.b.y + c * self.c.y) / (a + b + c);
+
+        Point { x, y }
+    }
+
+    /// Return the orthocenter of the triangle
+    pub fn orthocenter(&self) -> Point {
+        // calculate the slopes of the sides
+        let m1 = (self.b.y - self.a.y) / (self.b.x - self.a.x);
+        let m2 = (self.c.y - self.b.y) / (self.c.x - self.b.x);
+        let m3 = (self.a.y - self.c.y) / (self.a.x - self.c.x);
+
+        // calculate the orthocenter
+        let x = (m1 * m2 * (self.a.y - self.c.y)
+            + m2 * m3 * (self.a.y - self.b.y)
+            + m3 * m1 * (self.b.y - self.c.y))
+            / (m1 * m2 + m2 * m3 + m3 * m1);
+        let y = self.a.y - m1 * (x - self.a.x);
+
+        Point { x, y }
+    }
+
+    /// Return the centroid of the triangle
+    pub fn centroid(&self) -> Point {
+        Point {
+            x: (self.a.x + self.b.x + self.c.x) / 3.0,
+            y: (self.a.y + self.b.y + self.c.y) / 3.0,
+        }
     }
 }

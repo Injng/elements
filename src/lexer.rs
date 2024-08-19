@@ -93,17 +93,29 @@ fn match_fn(name: String) -> Function {
             args: Vec::new(),
             function: Box::new(functions::FnInscribedAngle),
         },
+        "point" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnPoint),
+        },
+        "incenter" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnIncenter),
+        },
+
+        // functions that return properties
+        "inradius" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnInradius),
+        },
 
         // basic geometric functions
         "circle" => Function {
             name,
             args: Vec::new(),
             function: Box::new(functions::FnCircle),
-        },
-        "point" => Function {
-            name,
-            args: Vec::new(),
-            function: Box::new(functions::FnPoint),
         },
         "triangle" => Function {
             name,

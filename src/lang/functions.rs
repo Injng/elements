@@ -217,6 +217,80 @@ impl Operation for FnAngle {
     }
 }
 
+#[derive(Clone)]
+pub struct FnIncenter;
+impl Operation for FnIncenter {
+    clone_impl!(FnIncenter);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 1 argument
+        if args.len() < 1 {
+            return Err("Incenter requires exactly 1 argument".to_string());
+        }
+
+        // check for 1 triangle
+        let triangle = match &args[0] {
+            Value::Triangle(t) => t.clone(),
+            _ => return Err("Invalid types for triangle".to_string()),
+        };
+
+        // try getting the incenter
+        return Ok(Value::Point(triangle.incenter()));
+    }
+}
+
+#[derive(Clone)]
+pub struct FnPoint;
+impl Operation for FnPoint {
+    clone_impl!(FnPoint);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 2 arguments
+        if args.len() < 2 {
+            return Err("Point requires exactly 2 arguments".to_string());
+        }
+
+        // try forcing the arguments into floats
+        let mut floats = Vec::new();
+        for arg in args {
+            match arg {
+                Value::Int(i) => floats.push(*i as f64),
+                Value::Float(f) => floats.push(*f),
+                _ => return Err("Invalid types for point".to_string()),
+            }
+        }
+
+        // return the point
+        Ok(Value::Point(Point {
+            x: floats[0],
+            y: floats[1],
+        }))
+    }
+}
+
+/*
+Functions that return properties
+*/
+
+#[derive(Clone)]
+pub struct FnInradius;
+impl Operation for FnInradius {
+    clone_impl!(FnInradius);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 1 argument
+        if args.len() < 1 {
+            return Err("Inradius requires exactly 1 argument".to_string());
+        }
+
+        // check for 1 triangle
+        let triangle = match &args[0] {
+            Value::Triangle(t) => t.clone(),
+            _ => return Err("Invalid types for triangle".to_string()),
+        };
+
+        // try getting the inradius
+        return Ok(Value::Float(triangle.inradius()));
+    }
+}
+
 /*
 Basic geometric shapes
 */
@@ -383,33 +457,5 @@ impl Operation for FnTriangle {
             Ok(triangle) => Ok(triangle),
             _ => Err("Invalid arguments for triangle".to_string()),
         }
-    }
-}
-
-#[derive(Clone)]
-pub struct FnPoint;
-impl Operation for FnPoint {
-    clone_impl!(FnPoint);
-    fn call(&self, args: &[Value]) -> Result<Value, String> {
-        // check for 2 arguments
-        if args.len() < 2 {
-            return Err("Point requires exactly 2 arguments".to_string());
-        }
-
-        // try forcing the arguments into floats
-        let mut floats = Vec::new();
-        for arg in args {
-            match arg {
-                Value::Int(i) => floats.push(*i as f64),
-                Value::Float(f) => floats.push(*f),
-                _ => return Err("Invalid types for point".to_string()),
-            }
-        }
-
-        // return the point
-        Ok(Value::Point(Point {
-            x: floats[0],
-            y: floats[1],
-        }))
     }
 }

@@ -1,4 +1,4 @@
 (setq A (point 5 5))
 (setq C (circle A 5))
 C
-(triangle C)
+(iangle C 90)
