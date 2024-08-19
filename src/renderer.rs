@@ -141,7 +141,7 @@ impl Render for SvgLabel {
         // extract point from option
         let point = match self.position {
             Some(point) => point,
-            None => Point { x: 0.0, y: 0.0 },
+            None => return "".to_string(),
         };
 
         format!(
@@ -368,14 +368,7 @@ impl Render for SvgCircle {
     }
 }
 
-pub fn render(values: Vec<Value>) -> Result<String, String> {
-    let mut elements: Vec<Box<dyn Render>> = Vec::new();
-    for value in values {
-        let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
-        elements.extend(svg_elements);
-    }
-    let mut svg = Svg { elements };
-
+fn label(svg: &mut Svg) {
     // mark pixels on bitmap
     let (_, max_point): (Point, Point) = svg.get_viewbox();
     let scale = 10.0;
@@ -444,6 +437,18 @@ pub fn render(values: Vec<Value>) -> Result<String, String> {
                 label.position.unwrap().y,
             );
         }
+    }
+}
+
+pub fn render(values: Vec<Value>, is_label: bool) -> Result<String, String> {
+    let mut elements: Vec<Box<dyn Render>> = Vec::new();
+    for value in values {
+        let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
+        elements.extend(svg_elements);
+    }
+    let mut svg = Svg { elements };
+    if is_label {
+        label(&mut svg);
     }
 
     Ok(svg.render())

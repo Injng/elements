@@ -21,6 +21,12 @@ fn main() {
         std::process::exit(1);
     }
 
+    // check if label is enabled
+    let mut is_label = false;
+    if args.len() > 2 && args[2] == "--label" {
+        is_label = true;
+    }
+
     // see if file exists
     let filename = &args[1];
     if !std::path::Path::new(filename).exists() {
@@ -47,7 +53,7 @@ fn main() {
     println!("{:?}", values);
 
     // render values to svg
-    let svg = render(values).expect("Failed to render");
+    let svg = render(values, is_label).expect("Failed to render");
     println!("{}", svg);
 
     // write svg to file
