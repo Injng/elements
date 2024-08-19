@@ -98,10 +98,25 @@ fn match_fn(name: String) -> Function {
             args: Vec::new(),
             function: Box::new(functions::FnPoint),
         },
+        "lineseg" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnLineseg),
+        },
         "incenter" => Function {
             name,
             args: Vec::new(),
             function: Box::new(functions::FnIncenter),
+        },
+        "orthocenter" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnOrthocenter),
+        },
+        "centroid" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnCentroid),
         },
 
         // functions that return properties

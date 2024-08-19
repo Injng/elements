@@ -17,6 +17,7 @@ pub enum Value {
     Triangle(Triangle),
     Angle(Angle),
     Circle(Circle),
+    Lineseg(Lineseg),
 }
 
 impl Element for Value {
@@ -28,6 +29,7 @@ impl Element for Value {
             Value::Angle(a) => a.to_svg(),
             Value::Circle(c) => c.to_svg(),
             Value::String(s) => s.to_svg(),
+            Value::Lineseg(l) => l.to_svg(),
             Value::Undefined => vec![Box::new(SvgNothing)],
             _ => vec![Box::new(SvgPolygon { points: vec![] })],
         }
@@ -64,6 +66,23 @@ impl Element for String {
 /*
 Basic geometric types
 */
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Lineseg {
+    pub start: Point,
+    pub end: Point,
+}
+
+impl Element for Lineseg {
+    /// Turn lineseg into a SVG element
+    fn to_svg(&self) -> Vec<Box<dyn Render>> {
+        println!("reached svg");
+        vec![Box::new(SvgLine {
+            start: self.start,
+            end: self.end,
+        })]
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point {
@@ -250,19 +269,18 @@ impl Triangle {
         Point { x, y }
     }
 
-    /// Return the orthocenter of the triangle
     pub fn orthocenter(&self) -> Point {
         // calculate the slopes of the sides
-        let m1 = (self.b.y - self.a.y) / (self.b.x - self.a.x);
-        let m2 = (self.c.y - self.b.y) / (self.c.x - self.b.x);
-        let m3 = (self.a.y - self.c.y) / (self.a.x - self.c.x);
+        let m1: f64 = (self.b.y - self.a.y) / (self.b.x - self.a.x);
+        let m2: f64 = (self.c.y - self.b.y) / (self.c.x - self.b.x);
 
-        // calculate the orthocenter
-        let x = (m1 * m2 * (self.a.y - self.c.y)
-            + m2 * m3 * (self.a.y - self.b.y)
-            + m3 * m1 * (self.b.y - self.c.y))
-            / (m1 * m2 + m2 * m3 + m3 * m1);
-        let y = self.a.y - m1 * (x - self.a.x);
+        // calculate the perpendicular slopes
+        let p1 = -1.0 / m1;
+        let p2 = -1.0 / m2;
+
+        // calculate the coordinates of the orthocenter
+        let x = (-p1 * self.c.x + p2 * self.a.x + self.c.y - self.a.y) / (p2 - p1);
+        let y = p1 * (x - self.c.x) + self.c.y;
 
         Point { x, y }
     }

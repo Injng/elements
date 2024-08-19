@@ -1,0 +1,11 @@
+(setq A (point 3 3))
+(setq B (point 5 8))
+(setq C (point 7 3))
+(setq triangle_a (triangle A B C))
+(setq O (centroid triangle_a))
+
+triangle_a
+O
+(lineseg A O)
+(lineseg B O)
+(lineseg C O)

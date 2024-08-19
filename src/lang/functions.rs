@@ -1,6 +1,6 @@
 use crate::interpreter::is_valid_variable;
 use crate::lang::types::Angle;
-use crate::lang::types::{Circle, Operation, Point, Triangle, Value};
+use crate::lang::types::{Circle, Lineseg, Operation, Point, Triangle, Value};
 use crate::utils::geometry::distance;
 
 /// Macro to implement cloning a boxed trait object
@@ -218,6 +218,44 @@ impl Operation for FnAngle {
 }
 
 #[derive(Clone)]
+pub struct FnLineseg;
+
+impl FnLineseg {
+    /// Case 1: create a line segment from two points
+    fn from_points(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 2 arguments
+        if args.len() < 2 {
+            return Err("Line segment requires exactly 2 arguments".to_string());
+        }
+
+        // check for 2 points
+        let mut points: Vec<Point> = Vec::new();
+        for arg in args {
+            match arg {
+                Value::Point(p) => points.push(p.clone()),
+                _ => return Err("Invalid types for point".to_string()),
+            }
+        }
+
+        // try creating the line segment
+        Ok(Value::Lineseg(Lineseg {
+            start: points[0],
+            end: points[1],
+        }))
+    }
+}
+
+impl Operation for FnLineseg {
+    clone_impl!(FnLineseg);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        match self.from_points(args) {
+            Ok(lineseg) => Ok(lineseg),
+            _ => Err("Invalid arguments for line segment".to_string()),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct FnIncenter;
 impl Operation for FnIncenter {
     clone_impl!(FnIncenter);
@@ -235,6 +273,48 @@ impl Operation for FnIncenter {
 
         // try getting the incenter
         return Ok(Value::Point(triangle.incenter()));
+    }
+}
+
+#[derive(Clone)]
+pub struct FnOrthocenter;
+impl Operation for FnOrthocenter {
+    clone_impl!(FnOrthocenter);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 1 argument
+        if args.len() < 1 {
+            return Err("Orthocenter requires exactly 1 argument".to_string());
+        }
+
+        // check for 1 triangle
+        let triangle = match &args[0] {
+            Value::Triangle(t) => t.clone(),
+            _ => return Err("Invalid types for triangle".to_string()),
+        };
+
+        // try getting the orthocenter
+        return Ok(Value::Point(triangle.orthocenter()));
+    }
+}
+
+#[derive(Clone)]
+pub struct FnCentroid;
+impl Operation for FnCentroid {
+    clone_impl!(FnCentroid);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 1 argument
+        if args.len() < 1 {
+            return Err("Centroid requires exactly 1 argument".to_string());
+        }
+
+        // check for 1 triangle
+        let triangle = match &args[0] {
+            Value::Triangle(t) => t.clone(),
+            _ => return Err("Invalid types for triangle".to_string()),
+        };
+
+        // try getting the centroid
+        return Ok(Value::Point(triangle.centroid()));
     }
 }
 

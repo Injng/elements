@@ -36,11 +36,9 @@ fn main() {
 
     // open file and read into string
     let contents = std::fs::read_to_string(filename).expect("Failed to read file");
-    println!("{}", contents);
 
     // tokenize string
     let tokens: Vec<Token> = tokenize(contents);
-    println!("{:?}", tokens);
 
     // evaluate tokens
     let values: Vec<Value> = match evaluate(tokens) {
