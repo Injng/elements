@@ -45,6 +45,13 @@ geometric functions:
 
 The `point` function creates a point with the given x and y coordinates in the first and second parameters respectively.
 
+### `circumcenter`
+```lisp
+(circumcenter [Triangle]) -> Point
+```
+
+The `circumcenter` function takes in a triangle and returns the circumcenter of that triangle.
+
 ### `orthocenter`
 ```lisp
 (orthocenter [Triangle]) -> Point
@@ -72,6 +79,13 @@ The `incenter` function takes in a triangle and returns the incenter of that tri
 ```
 
 The `lineseg` function creates a line segment with the given two points as the endpoints.
+
+### `midpoint`
+```lisp
+(midpoint [Point] [Point]) -> Point
+```
+
+The `midpoint` function returns a point that is the midpoint of the two given points.
 
 ### `triangle`
 ```lisp

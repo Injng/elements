@@ -98,10 +98,20 @@ fn match_fn(name: String) -> Function {
             args: Vec::new(),
             function: Box::new(functions::FnPoint),
         },
+        "midpoint" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnMidpoint),
+        },
         "lineseg" => Function {
             name,
             args: Vec::new(),
             function: Box::new(functions::FnLineseg),
+        },
+        "circumcenter" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnCircumcenter),
         },
         "incenter" => Function {
             name,

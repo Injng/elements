@@ -1,7 +1,7 @@
 use crate::interpreter::is_valid_variable;
 use crate::lang::types::Angle;
 use crate::lang::types::{Circle, Lineseg, Operation, Point, Triangle, Value};
-use crate::utils::geometry::distance;
+use crate::utils::geometry::{distance, midpoint};
 
 /// Macro to implement cloning a boxed trait object
 macro_rules! clone_impl {
@@ -21,7 +21,7 @@ pub struct FnSet;
 impl Operation for FnSet {
     clone_impl!(FnSet);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("setq requires exactly 2 arguments".to_string());
         }
         let var_name = match &args[0] {
@@ -44,7 +44,7 @@ pub struct FnAdd;
 impl Operation for FnAdd {
     clone_impl!(FnAdd);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("Add requires exactly 2 arguments".to_string());
         }
         match (&args[0], &args[1]) {
@@ -60,7 +60,7 @@ pub struct FnSub;
 impl Operation for FnSub {
     clone_impl!(FnSub);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("Sub requires exactly 2 arguments".to_string());
         }
         match (&args[0], &args[1]) {
@@ -76,7 +76,7 @@ pub struct FnMul;
 impl Operation for FnMul {
     clone_impl!(FnMul);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("Mul requires exactly 2 arguments".to_string());
         }
         match (&args[0], &args[1]) {
@@ -92,7 +92,7 @@ pub struct FnDiv;
 impl Operation for FnDiv {
     clone_impl!(FnDiv);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("Div requires exactly 2 arguments".to_string());
         }
         match (&args[0], &args[1]) {
@@ -185,7 +185,7 @@ impl FnAngle {
     /// Case 1: create an angle from three points
     fn from_points(&self, args: &[Value]) -> Result<Value, String> {
         // check for 3 arguments
-        if args.len() < 3 {
+        if args.len() != 3 {
             return Err("Angle requires exactly 3 arguments".to_string());
         }
 
@@ -224,7 +224,7 @@ impl FnLineseg {
     /// Case 1: create a line segment from two points
     fn from_points(&self, args: &[Value]) -> Result<Value, String> {
         // check for 2 arguments
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("Line segment requires exactly 2 arguments".to_string());
         }
 
@@ -256,12 +256,58 @@ impl Operation for FnLineseg {
 }
 
 #[derive(Clone)]
+pub struct FnMidpoint;
+impl Operation for FnMidpoint {
+    clone_impl!(FnMidpoint);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 2 arguments
+        if args.len() != 2 {
+            return Err("Midpoint requires exactly 2 arguments".to_string());
+        }
+
+        // Extract the two points from the arguments
+        let p1 = match &args[0] {
+            Value::Point(p) => p.clone(),
+            _ => return Err("Invalid type for first argument, expected a Point".to_string()),
+        };
+        let p2 = match &args[1] {
+            Value::Point(p) => p.clone(),
+            _ => return Err("Invalid type for second argument, expected a Point".to_string()),
+        };
+
+        // try getting the midpoint
+        return Ok(Value::Point(midpoint(p1, p2)));
+    }
+}
+
+#[derive(Clone)]
+pub struct FnCircumcenter;
+impl Operation for FnCircumcenter {
+    clone_impl!(FnCircumcenter);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 1 argument
+        if args.len() != 1 {
+            return Err("Circumcenter requires exactly 1 argument".to_string());
+        }
+
+        // check for 1 triangle
+        let triangle = match &args[0] {
+            Value::Triangle(t) => t.clone(),
+            _ => return Err("Invalid types for triangle".to_string()),
+        };
+
+        // try getting the circumcenter
+        return Ok(Value::Point(triangle.circumcenter()));
+    }
+}
+
+#[derive(Clone)]
 pub struct FnIncenter;
 impl Operation for FnIncenter {
     clone_impl!(FnIncenter);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
         // check for 1 argument
-        if args.len() < 1 {
+        if args.len() != 1 {
             return Err("Incenter requires exactly 1 argument".to_string());
         }
 
@@ -282,7 +328,7 @@ impl Operation for FnOrthocenter {
     clone_impl!(FnOrthocenter);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
         // check for 1 argument
-        if args.len() < 1 {
+        if args.len() != 1 {
             return Err("Orthocenter requires exactly 1 argument".to_string());
         }
 
@@ -303,7 +349,7 @@ impl Operation for FnCentroid {
     clone_impl!(FnCentroid);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
         // check for 1 argument
-        if args.len() < 1 {
+        if args.len() != 1 {
             return Err("Centroid requires exactly 1 argument".to_string());
         }
 
@@ -324,7 +370,7 @@ impl Operation for FnPoint {
     clone_impl!(FnPoint);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
         // check for 2 arguments
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("Point requires exactly 2 arguments".to_string());
         }
 
@@ -356,7 +402,7 @@ impl Operation for FnInradius {
     clone_impl!(FnInradius);
     fn call(&self, args: &[Value]) -> Result<Value, String> {
         // check for 1 argument
-        if args.len() < 1 {
+        if args.len() != 1 {
             return Err("Inradius requires exactly 1 argument".to_string());
         }
 
@@ -381,7 +427,7 @@ impl FnCircle {
     /// Case 1: create a circle from a point and a radius
     fn from_point_radius(&self, args: &[Value]) -> Result<Value, String> {
         // check for 2 arguments
-        if args.len() < 2 {
+        if args.len() != 2 {
             return Err("Circle requires exactly 2 arguments".to_string());
         }
 
@@ -407,7 +453,7 @@ impl FnCircle {
     fn new(&self, args: &[Value]) -> Result<Value, String> {
         // check for no arguments
         if args.len() != 0 {
-            return Err("Circle requires exactly 2 arguments".to_string());
+            return Err("Circle requires no elements".to_string());
         }
 
         // try creating the circle
@@ -439,7 +485,7 @@ impl FnTriangle {
     /// Case 1: create a triangle from three points
     fn from_points(&self, args: &[Value]) -> Result<Value, String> {
         // check for 3 arguments
-        if args.len() < 3 {
+        if args.len() != 3 {
             return Err("Triangle requires exactly 3 arguments".to_string());
         }
 
@@ -462,7 +508,7 @@ impl FnTriangle {
     /// Case 2: create a triangle from an angle
     fn from_angle(&self, args: &[Value]) -> Result<Value, String> {
         // check for 1 argument
-        if args.len() < 1 {
+        if args.len() != 1 {
             return Err("Triangle requires exactly 1 argument".to_string());
         }
 
@@ -487,7 +533,7 @@ impl FnTriangle {
     /// Case 3 [ambiguous]: create a triangle from a circle
     fn from_circle(&self, args: &[Value]) -> Result<Value, String> {
         // check for 1 argument
-        if args.len() < 1 {
+        if args.len() != 1 {
             return Err("Triangle requires exactly 1 argument".to_string());
         }
 

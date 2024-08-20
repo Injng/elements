@@ -269,6 +269,7 @@ impl Triangle {
         Point { x, y }
     }
 
+    /// Return the orthocenter of the triangle
     pub fn orthocenter(&self) -> Point {
         // calculate the slopes of the sides
         let m1: f64 = (self.b.y - self.a.y) / (self.b.x - self.a.x);
@@ -291,5 +292,32 @@ impl Triangle {
             x: (self.a.x + self.b.x + self.c.x) / 3.0,
             y: (self.a.y + self.b.y + self.c.y) / 3.0,
         }
+    }
+
+    /// Return the circumcenter of the triangle
+    pub fn circumcenter(&self) -> Point {
+        // calculate the midpoints of the sides
+        let m1 = Point {
+            x: (self.a.x + self.b.x) / 2.0,
+            y: (self.a.y + self.b.y) / 2.0,
+        };
+        let m2 = Point {
+            x: (self.b.x + self.c.x) / 2.0,
+            y: (self.b.y + self.c.y) / 2.0,
+        };
+
+        // calculate the slopes of the sides
+        let s1 = (self.b.y - self.a.y) / (self.b.x - self.a.x);
+        let s2 = (self.c.y - self.b.y) / (self.c.x - self.b.x);
+
+        // calculate the perpendicular slopes
+        let p1 = -1.0 / s1;
+        let p2 = -1.0 / s2;
+
+        // calculate the circumcenter
+        let x = (m2.y - m1.y + p1 * m1.x - p2 * m2.x) / (p1 - p2);
+        let y = p1 * (x - m1.x) + m1.y;
+
+        Point { x, y }
     }
 }

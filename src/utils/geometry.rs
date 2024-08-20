@@ -1,5 +1,13 @@
 use crate::lang::types::Point;
 
+/// Function that returns the midpoint between two points
+pub fn midpoint(first: Point, second: Point) -> Point {
+    Point {
+        x: (first.x + second.x) / 2.0,
+        y: (first.y + second.y) / 2.0,
+    }
+}
+
 /// Function that returns the distance between two points
 pub fn distance(first: Point, second: Point) -> f64 {
     ((first.x - second.x).powi(2) + (first.y - second.y).powi(2)).sqrt()
