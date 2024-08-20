@@ -45,6 +45,33 @@ geometric functions:
 
 The `point` function creates a point with the given x and y coordinates in the first and second parameters respectively.
 
+### `orthocenter`
+```lisp
+(orthocenter [Triangle]) -> Point
+```
+
+The `orthocenter` function takes in a triangle and returns the orthocenter of that triangle.
+
+### `centroid`
+```lisp
+(centroid [Triangle]) -> Point
+```
+
+The `centroid` function takes in a triangle and returns the centroid of that triangle.
+
+### `incenter`
+```lisp
+(incenter [Triangle]) -> Point
+```
+
+The `incenter` function takes in a triangle and returns the incenter of that triangle.
+
+### `lineseg`
+```lisp
+(lineseg [Point] [Point]) -> Lineseg
+```
+
+The `lineseg` function creates a line segment with the given two points as the endpoints.
 
 ### `triangle`
 ```lisp
