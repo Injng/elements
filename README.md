@@ -14,6 +14,19 @@ and outputs the correct svg code.
 Note: main repository is developed using Mercurial, at [https://hg.sr.ht/~lnjng/elements](https://hg.sr.ht/~lnjng/elements).
 
 ## Usage
+To install the program, simply use cargo:
+```bash
+cargo install elements-lang
+```
+
+To run the program, use the following command:
+```bash
+elements-lang <input file>
+```
+
+The program will then output the svg code to stdout as well as to a file called `out.svg`. To enable the labelling system, the
+`--label` flag can be used.
+
 Here is an example to render a triangle:
 ```lisp
 (setq A (point 0 0))
@@ -68,6 +81,13 @@ The `orthocenter` function takes in a triangle and returns the orthocenter of th
 ```
 
 The `centroid` function takes in a triangle and returns the centroid of that triangle.
+
+### `inradius`
+```lisp
+(inradius [Triangle]) -> Int/Float
+```
+
+The `inradius` function takes in a triangle and returns the inradius of that triangle.
 
 ### `incenter`
 ```lisp
@@ -139,3 +159,19 @@ The `angle` function creates an angle from three points denoted in the three par
 
 The `iangle` function creates an inscribed angle in a circle. The first parameter is the circle, and the second parameter is the
 angle in degrees.
+
+### `intersect`
+```lisp
+(intersect [Lineseg] [Circle] [Int]) -> Point
+```
+
+The first case for the `intersect` function involves three parameters. The first parameter is a line segment, the second is a circle,
+and the third is an int representing either 0 or 1, the index of the point of intersection. As a line can maximally meet a circle at
+two points, the index is used to determine which point to return.
+
+```lisp
+(intersect [Lineseg] [Lineseg]) -> Point
+```
+
+The second case for the `intersect` function involves two line segments. The function will return the point of intersection between
+the two line segments.
