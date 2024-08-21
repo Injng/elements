@@ -10,3 +10,7 @@ repository = "https://hg.sr.ht/~lnjng/elements"
 
 [dependencies]
 rand = "0.8.5"
+
+[[bin]]
+name = "elements"
+path = "src/main.rs"
