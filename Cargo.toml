@@ -2,6 +2,11 @@
 name = "elements"
 version = "0.1.0"
 edition = "2021"
+authors = ["Lin Jiang"]
+description = "A geometry markup language and diagram renderer."
+license = "MIT"
+readme = "README.md"
+repository = "https://hg.sr.ht/~lnjng/elements"
 
 [dependencies]
 rand = "0.8.5"
