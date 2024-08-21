@@ -73,6 +73,18 @@ pub struct Lineseg {
     pub end: Point,
 }
 
+impl Lineseg {
+    /// Return the slope of the lineseg
+    pub fn slope(&self) -> f64 {
+        (self.end.y - self.start.y) / (self.end.x - self.start.x)
+    }
+
+    /// Return the y intercept of the lineseg
+    pub fn y_intercept(&self) -> f64 {
+        self.start.y - self.slope() * self.start.x
+    }
+}
+
 impl Element for Lineseg {
     /// Turn lineseg into a SVG element
     fn to_svg(&self) -> Vec<Box<dyn Render>> {
@@ -95,7 +107,8 @@ impl Element for Point {
     fn to_svg(&self) -> Vec<Box<dyn Render>> {
         vec![Box::new(SvgCircle {
             center: *self,
-            radius: 0.01,
+            radius: 0.05,
+            fill: true,
         })]
     }
 }
@@ -134,6 +147,7 @@ impl Element for Circle {
         vec![Box::new(SvgCircle {
             center: self.center,
             radius: self.radius,
+            fill: false,
         })]
     }
 }

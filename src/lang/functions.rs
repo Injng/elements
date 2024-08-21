@@ -397,6 +397,119 @@ Functions that return properties
 */
 
 #[derive(Clone)]
+pub struct FnIntersect;
+
+impl FnIntersect {
+    /// Case 1: Two line segments
+    fn from_linesegs(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 2 arguments
+        if args.len() != 2 {
+            return Err("Intersect requires exactly 2 arguments".to_string());
+        }
+
+        // check for 2 line segments
+        let lineseg1 = match &args[0] {
+            Value::Lineseg(l) => l.clone(),
+            _ => return Err("Invalid types for line segment".to_string()),
+        };
+        let lineseg2 = match &args[1] {
+            Value::Lineseg(l) => l.clone(),
+            _ => return Err("Invalid types for line segment".to_string()),
+        };
+
+        // check if line segments are parallel
+        if lineseg1.slope() == lineseg2.slope() {
+            return Err("Line segments are parallel".to_string());
+        }
+
+        // handle vertical line segments
+        if lineseg1.slope().abs() == f64::INFINITY {
+            let x = lineseg1.start.x;
+            let y = lineseg2.slope() * x + lineseg2.y_intercept();
+            return Ok(Value::Point(Point { x, y }));
+        } else if lineseg2.slope().abs() == f64::INFINITY {
+            let x = lineseg2.start.x;
+            let y = lineseg1.slope() * x + lineseg1.y_intercept();
+            return Ok(Value::Point(Point { x, y }));
+        }
+
+        // otherwise, find the intersection point
+        let x = (lineseg2.y_intercept() - lineseg1.y_intercept())
+            / (lineseg1.slope() - lineseg2.slope());
+        let y = lineseg1.slope() * x + lineseg1.y_intercept();
+
+        Ok(Value::Point(Point { x, y }))
+    }
+
+    /// Case 2: One line segment and one circle
+    fn from_lineseg_circle(&self, args: &[Value]) -> Result<Value, String> {
+        // check for 3 arguments
+        if args.len() != 3 {
+            return Err("Intersect requires exactly 3 arguments".to_string());
+        }
+
+        // check for 1 line segment, 1 circle, and 1 index either 0 or 1
+        let lineseg = match &args[0] {
+            Value::Lineseg(l) => l.clone(),
+            _ => return Err("Invalid types for line segment".to_string()),
+        };
+        let circle = match &args[1] {
+            Value::Circle(c) => c.clone(),
+            _ => return Err("Invalid types for circle".to_string()),
+        };
+        let index = match &args[2] {
+            Value::Int(i) => *i,
+            _ => return Err("Invalid types for index".to_string()),
+        };
+        if index != 0 && index != 1 {
+            return Err("Index must be either 0 or 1".to_string());
+        }
+
+        // calculate the intersection points without methods
+        let a = lineseg.start.y;
+        let b = lineseg.end.y;
+        let c = circle.center.x;
+        let d = circle.center.y;
+        let r = circle.radius;
+        let m = (b - a) / (lineseg.start.x - lineseg.end.x);
+        let n = (a * lineseg.end.y - b * lineseg.start.y) / (lineseg.end.x - lineseg.start.x);
+        let A = 1.0 + m * m;
+        let B = 2.0 * (m * n - m * d - c);
+        let C = c * c + d * d + n * n - 2.0 * n * d - r * r;
+        let D = B * B - 4.0 * A * C;
+        if D < 0.0 {
+            return Err("No intersection points".to_string());
+        }
+        let x1 = (-B + D.sqrt()) / (2.0 * A);
+        let x2 = (-B - D.sqrt()) / (2.0 * A);
+        let y1 = m * x1 + n;
+        let y2 = m * x2 + n;
+
+        // return the intersection point
+        if index == 0 {
+            Ok(Value::Point(Point { x: x1, y: y1 }))
+        } else {
+            Ok(Value::Point(Point { x: x2, y: y2 }))
+        }
+    }
+}
+
+impl Operation for FnIntersect {
+    clone_impl!(FnIntersect);
+    fn call(&self, args: &[Value]) -> Result<Value, String> {
+        match self.from_linesegs(args) {
+            Ok(point) => return Ok(point),
+            _ => {}
+        }
+
+        match self.from_lineseg_circle(args) {
+            Ok(point) => Ok(point),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct FnInradius;
 impl Operation for FnInradius {
     clone_impl!(FnInradius);

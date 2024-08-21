@@ -1,7 +1,6 @@
 use crate::lang::functions;
 use crate::lang::types::{Operation, Value};
 use std::fmt::{Debug, Error, Formatter};
-use std::rc::Weak;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
@@ -131,6 +130,11 @@ fn match_fn(name: String) -> Function {
         },
 
         // functions that return properties
+        "intersect" => Function {
+            name,
+            args: Vec::new(),
+            function: Box::new(functions::FnIntersect),
+        },
         "inradius" => Function {
             name,
             args: Vec::new(),

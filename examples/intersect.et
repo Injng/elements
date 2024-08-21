@@ -1,0 +1,7 @@
+(setq C (circle (point 0 0) 5))
+(setq L (lineseg (point 0 0) (point 3 0)))
+
+C
+L
+(intersect L C 0)
+(intersect L C 1)

@@ -3,9 +3,15 @@
 (setq C (point 7 3))
 (setq triangle_a (triangle A B C))
 (setq O (centroid triangle_a))
+(setq line_A (lineseg A O))
+(setq line_B (lineseg B O))
+(setq line_C (lineseg C O))
 
 triangle_a
 O
-(lineseg A O)
-(lineseg B O)
-(lineseg C O)
+line_A
+line_B
+line_C
+(intersect line_A (lineseg B C))
+(intersect line_B (lineseg A C))
+(intersect line_C (lineseg A B))

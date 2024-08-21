@@ -306,14 +306,20 @@ impl Render for SvgLine {
 pub struct SvgCircle {
     pub center: Point,
     pub radius: f64,
+    pub fill: bool,
 }
 
 impl Render for SvgCircle {
     impl_as_any!(SvgCircle);
     fn render(&self) -> String {
+        let mut fill_value = "none";
+        if self.fill {
+            fill_value = "black";
+        }
+
         format!(
-            "\t<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"black\" stroke-width=\"0.02\"/>\n",
-            self.center.x, self.center.y, self.radius
+            "\t<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>\n",
+            self.center.x, self.center.y, self.radius, fill_value
         )
     }
 
