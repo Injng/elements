@@ -1,6 +1,7 @@
 use crate::lang::functions;
 use crate::lang::types::{Operation, Value};
 use std::fmt::{Debug, Error, Formatter};
+use std::rc::Weak;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
@@ -187,14 +188,40 @@ pub fn tokenize(s: String) -> Vec<Token> {
     let separated: Vec<String> = s
         .replace("(", " ( ")
         .replace(")", " ) ")
+        .replace(";", " ; ")
+        .replace("\n", " \\n ")
         .split_whitespace()
         .map(String::from)
         .collect();
 
+    println!("{:?}", separated);
+
     // match the tokens
     let mut tokens: Vec<Token> = Vec::new();
     let mut prev_paren = false;
+    let mut is_comment = false;
     for word in separated {
+        // catch comments
+        if word == ";" {
+            is_comment = true;
+            continue;
+        }
+
+        // handle comments
+        if is_comment {
+            if word == "(" || word == ")" || word == "\\n" {
+                is_comment = false;
+            } else {
+                continue;
+            }
+        }
+
+        // catch newlines
+        if word == "\\n" {
+            continue;
+        }
+
+        // match and push the appropriate token
         let token: Token = match_token(word, prev_paren);
         prev_paren = token == Token::LeftParen;
         tokens.push(token);

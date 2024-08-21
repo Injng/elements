@@ -9,6 +9,8 @@ and then interpret these tokens into a set of `Value`s. These `Value`s then impl
 into `Svg` objects that hold the `Render` trait. The rendering system, located in the file `renderer.rs`, then takes these objects
 and outputs the correct svg code.
 
+- [ ] implement better labelling system
+
 Note: main repository is developed using Mercurial, at [https://hg.sr.ht/~lnjng/elements](https://hg.sr.ht/~lnjng/elements).
 
 ## Usage
@@ -27,13 +29,14 @@ The language is written in simple lisp syntax. Notably, however, you can simply 
 and the interpreter will automatically substitute the value of the variable and render the appropriate object. For example, the
 following code will render a triangle with vertices at (0, 0), (0, 3), and (4, 0):
 ```lisp
+; this is a triangle
 (setq A (point 0 0))
 (setq B (point 0 3))
 (setq C (point 4 0))
 (setq T (triangle A B C))
 T
 ```
-Notice how the `setq` function is used to set variables.
+Notice how the `setq` function is used to set variables, and how comments are started with a semicolon.
 
 Functions are also often overloaded to provide more functionality with the same easy syntax. The following are the available
 geometric functions:
