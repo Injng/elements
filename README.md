@@ -21,7 +21,7 @@ cargo install elements-lang
 
 To run the program, use the following command:
 ```bash
-elements-lang <input file>
+elements <input file>
 ```
 
 The program will then output the svg code to stdout as well as to a file called `out.svg`. To enable the labelling system, the
