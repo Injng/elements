@@ -187,7 +187,7 @@ fn match_token(token: String, prev_paren: bool) -> Token {
 }
 
 /// Given a string, tokenize it into a vector of tokens
-pub fn tokenize(s: String) -> Vec<Token> {
+pub fn tokenize(s: String, is_debug: bool) -> Vec<Token> {
     // split the string into a vector of strings based on whitespace
     let separated: Vec<String> = s
         .replace("(", " ( ")
@@ -198,7 +198,9 @@ pub fn tokenize(s: String) -> Vec<Token> {
         .map(String::from)
         .collect();
 
-    println!("{:?}", separated);
+    if is_debug {
+        println!("{:?}", separated);
+    }
 
     // match the tokens
     let mut tokens: Vec<Token> = Vec::new();

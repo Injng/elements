@@ -254,7 +254,6 @@ pub struct SvgLine {
 impl Render for SvgLine {
     impl_as_any!(SvgLine);
     fn render(&self) -> String {
-        println!("reached");
         format!(
             "\t<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" stroke-width=\"0.02\"/>\n",
             self.start.x, self.start.y, self.end.x, self.end.y
@@ -447,13 +446,18 @@ fn label(svg: &mut Svg) {
     }
 }
 
-pub fn render(values: Vec<Value>, is_label: bool) -> Result<String, String> {
+pub fn render(values: Vec<Value>, is_label: bool, is_debug: bool) -> Result<String, String> {
     let mut elements: Vec<Box<dyn Render>> = Vec::new();
-    for value in values {
-        println!("{:?}", value);
-        let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
-        elements.extend(svg_elements);
+
+    // print values if debug is enabled
+    if is_debug {
+        for value in values {
+            println!("{:?}", value);
+            let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
+            elements.extend(svg_elements);
+        }
     }
+
     let mut svg = Svg { elements };
     if is_label {
         label(&mut svg);
