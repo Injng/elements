@@ -434,14 +434,6 @@ fn label(svg: &mut Svg) {
                     y: center_y,
                 });
             }
-
-            // print position
-            println!(
-                "{}: ({}, {})",
-                label.text,
-                label.position.unwrap().x,
-                label.position.unwrap().y,
-            );
         }
     }
 }
@@ -449,13 +441,14 @@ fn label(svg: &mut Svg) {
 pub fn render(values: Vec<Value>, is_label: bool, is_debug: bool) -> Result<String, String> {
     let mut elements: Vec<Box<dyn Render>> = Vec::new();
 
-    // print values if debug is enabled
-    if is_debug {
-        for value in values {
+    // render the svg
+    for value in values {
+        // print values if debug is enabled
+        if is_debug {
             println!("{:?}", value);
-            let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
-            elements.extend(svg_elements);
         }
+        let svg_elements: Vec<Box<dyn Render>> = value.to_svg();
+        elements.extend(svg_elements);
     }
 
     let mut svg = Svg { elements };

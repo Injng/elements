@@ -88,7 +88,6 @@ impl Lineseg {
 impl Element for Lineseg {
     /// Turn lineseg into a SVG element
     fn to_svg(&self) -> Vec<Box<dyn Render>> {
-        println!("reached svg");
         vec![Box::new(SvgLine {
             start: self.start,
             end: self.end,
